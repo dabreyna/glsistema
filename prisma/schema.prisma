@@ -1,0 +1,1563 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model admin_cierre_periodo_cabecera {
+  id_cabecera  Int          @id @default(autoincrement())
+  anio         Int
+  mes          Int
+  id_usuario   Int
+  fecha        DateTime     @db.Timestamp(6)
+  cat_usuarios cat_usuarios @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_cierre_periodo_cabecera_cat_usuarios")
+}
+
+model admin_cierre_periodo_detalle {
+  id_detalle              Int                  @id @default(autoincrement())
+  anio                    Int
+  mes                     Int
+  id_fraccionamiento      Int
+  total_terrenos          Int
+  post_venta              Int
+  activos                 Int
+  disponibles             Int
+  donaciones              Int
+  bloqueados              Int
+  total_contratado        Decimal              @db.Decimal(19, 2)
+  deposito                Decimal              @db.Decimal(19, 2)
+  deposito_nc             Decimal              @db.Decimal(19, 2)
+  mensualidad             Decimal              @db.Decimal(19, 2)
+  mensualidad_nc          Decimal              @db.Decimal(19, 2)
+  descuentos              Decimal              @db.Decimal(19, 2)
+  total_pagado            Decimal              @db.Decimal(19, 2)
+  total_pagado_nc         Decimal              @db.Decimal(19, 2)
+  saldo                   Decimal              @db.Decimal(19, 2)
+  clientes_vencidos_1_mes Int
+  clientes_vencidos_2_mes Int
+  clientes_vencidos_3_mes Int
+  clientes_vencidos_4_mes Int
+  monto_vencido_1_mes     Decimal              @db.Decimal(19, 2)
+  monto_vencido_2_mes     Decimal              @db.Decimal(19, 2)
+  monto_vencido_3_mes     Decimal              @db.Decimal(19, 2)
+  monto_vencido_4_mes     Decimal              @db.Decimal(19, 2)
+  total_servicios         Decimal              @db.Decimal(19, 2)
+  total_servicios_nc      Decimal              @db.Decimal(19, 2)
+  total_intereses         Decimal              @db.Decimal(19, 2)
+  total_intereses_nc      Decimal              @db.Decimal(19, 2)
+  cat_fraccionamientos    cat_fraccionamientos @relation(fields: [id_fraccionamiento], references: [id_fraccionamiento], onDelete: NoAction, onUpdate: NoAction, map: "fk_cierre_periodo_detalle_cat_fraccionamientos")
+}
+
+model agenda {
+  id_agenda                                               BigInt                    @id @default(autoincrement())
+  id_cliente                                              Int?
+  id_usuario                                              Int?
+  fecha_alta                                              DateTime?                 @db.Timestamp(6)
+  fecha_compromiso                                        DateTime?                 @db.Timestamp(6)
+  id_clasificacion                                        Int?
+  comentario                                              String?
+  id_usuario_comentario                                   Int?
+  id_estatus_agenda                                       Int?
+  cat_estatus_agenda                                      cat_estatus_agenda?       @relation(fields: [id_estatus_agenda], references: [id_estatus_agenda], onDelete: NoAction, onUpdate: NoAction, map: "fk_agenda_cat_estatus_agenda")
+  cat_usuarios_agenda_id_usuarioTocat_usuarios            cat_usuarios?             @relation("agenda_id_usuarioTocat_usuarios", fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_agenda_cat_usuarios_agenda")
+  cat_usuarios_agenda_id_usuario_comentarioTocat_usuarios cat_usuarios?             @relation("agenda_id_usuario_comentarioTocat_usuarios", fields: [id_usuario_comentario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_agenda_cat_usuarios_comentario")
+  cat_ventas_clasificacion                                cat_ventas_clasificacion? @relation(fields: [id_clasificacion], references: [id_clasificacion], onDelete: NoAction, onUpdate: NoAction, map: "fk_agenda_cat_ventas_clasificacion")
+  clientes                                                clientes?                 @relation(fields: [id_cliente], references: [id_cliente], onDelete: NoAction, onUpdate: NoAction, map: "fk_agenda_clientes")
+
+  @@index([id_estatus_agenda], map: "fki_fk_agenda_cat_estatus_agenda")
+  @@index([id_usuario], map: "fki_fk_agenda_cat_usuarios_agenda")
+  @@index([id_usuario_comentario], map: "fki_fk_agenda_cat_usuarios_comentario")
+  @@index([id_clasificacion], map: "fki_fk_agenda_cat_ventas_clasificacion")
+  @@index([id_cliente], map: "fki_fk_agenda_clientes")
+  @@index([id_clasificacion], map: "clasificacion")
+  @@index([id_cliente], map: "cliente")
+  @@index([id_cliente, id_clasificacion], map: "cliente_clasificacion")
+}
+
+model agenda_cobranza {
+  id_agenda                                                     BigInt                         @id @default(autoincrement())
+  id_contrato                                                   Int?
+  id_usuario                                                    Int?
+  fecha_alta                                                    DateTime?                      @db.Timestamp(6)
+  fecha_compromiso                                              DateTime?                      @db.Timestamptz(6)
+  id_clasificacion                                              Int?
+  comentario                                                    String?
+  id_tipo_comentario                                            Int?
+  bnd_mostrar_caja                                              Boolean?
+  bnd_atendido                                                  Boolean?
+  id_usuario_atendio                                            Int?
+  cat_cobranza_clasificacion                                    cat_cobranza_clasificacion?    @relation(fields: [id_clasificacion], references: [id_clasificacion], onDelete: NoAction, onUpdate: NoAction, map: "fk_agenda_cobranza_cat_cobranza_clasificacion")
+  cat_cobranza_tipos_comentario                                 cat_cobranza_tipos_comentario? @relation(fields: [id_tipo_comentario], references: [id_tipo], onDelete: NoAction, onUpdate: NoAction, map: "fk_agenda_cobranza_cat_cobranza_tipos_comentario")
+  cat_usuarios_agenda_cobranza_id_usuarioTocat_usuarios         cat_usuarios?                  @relation("agenda_cobranza_id_usuarioTocat_usuarios", fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_agenda_cobranza_cat_usuarios")
+  cat_usuarios_agenda_cobranza_id_usuario_atendioTocat_usuarios cat_usuarios?                  @relation("agenda_cobranza_id_usuario_atendioTocat_usuarios", fields: [id_usuario_atendio], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_agenda_cobranza_cat_ususarios_atendio")
+  contratos_terrenos                                            contratos_terrenos?            @relation(fields: [id_contrato], references: [id_contrato], onDelete: NoAction, onUpdate: NoAction, map: "fk_agenda_cobranza_contratos_terrenos")
+
+  @@index([id_contrato], map: "contrato")
+  @@index([id_contrato, id_usuario], map: "contrato_usuario")
+  @@index([id_usuario], map: "usuario")
+  @@index([id_contrato], map: "idx_agenda_cobranza_contrato")
+  @@index([id_contrato, fecha_alta], map: "idx_agenda_cobranza_contrato_fecha")
+}
+
+model agua_reconexiones {
+  id_reconexion Int           @id @default(autoincrement())
+  nomenclatura  String?       @db.VarChar(50)
+  periodo       Int?
+  fecha_captura DateTime?     @db.Date
+  usuario       Int?
+  estatus       Boolean?
+  cat_usuarios  cat_usuarios? @relation(fields: [usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_agua_reconexiones_cat_usuarios")
+
+  @@index([usuario], map: "fki_fk_agua_reconexiones_cat_usuarios")
+}
+
+model ajuste_anual {
+  id_ajuste             Int                    @id @default(autoincrement())
+  id_empresa            Int?
+  id_fraccionamiento    Int?
+  id_manzana            Int?
+  id_terreno            Int?
+  cliente               String?                @db.VarChar
+  fecha_inicio_contrato DateTime?              @db.Timestamp(6)
+  fecha_fin_contrato    DateTime?              @db.Timestamp(6)
+  mes                   Int?
+  cantidad              Decimal?               @db.Decimal(8, 2)
+  id_usuario            Int?
+  fecha_ajuste          DateTime?              @db.Timestamp(6)
+  anio                  Int?
+  cat_empresas          cat_empresas?          @relation(fields: [id_empresa], references: [id_empresa], onDelete: NoAction, onUpdate: NoAction, map: "fk_ajuste_anual_cat_empresas")
+  cat_fraccionamientos  cat_fraccionamientos?  @relation(fields: [id_fraccionamiento], references: [id_fraccionamiento], onDelete: NoAction, onUpdate: NoAction, map: "fk_ajuste_anual_cat_fraccionamientos")
+  cat_manzanas          cat_manzanas?          @relation(fields: [id_manzana], references: [id_manzana], onDelete: NoAction, onUpdate: NoAction, map: "fk_ajuste_anual_cat_manzanas")
+  cat_terrenos          cat_terrenos?          @relation(fields: [id_terreno], references: [id_terreno], onDelete: NoAction, onUpdate: NoAction, map: "fk_ajuste_anual_cat_terrenos")
+  cat_usuarios          cat_usuarios?          @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_ajuste_anual_cat_usuarios")
+  ajuste_anual_detalle  ajuste_anual_detalle[]
+
+  @@index([id_empresa], map: "fki_fk_ajuste_anual_cat_empresas")
+  @@index([id_fraccionamiento], map: "fki_fk_ajuste_anual_cat_fraccionamientos")
+  @@index([id_manzana], map: "fki_fk_ajuste_anual_cat_manzanas")
+  @@index([id_terreno], map: "fki_fk_ajuste_anual_cat_terrenos")
+  @@index([id_usuario], map: "fki_fk_ajuste_anual_cat_usuarios")
+}
+
+model ajuste_anual_detalle {
+  id_ajuste                Int
+  id_contrato              Int
+  saldo_anterior           Decimal            @db.Decimal(19, 2)
+  saldo_actual             Decimal            @db.Decimal(19, 2)
+  mensualidad_anterior     Decimal            @db.Decimal(19, 2)
+  mensualidad_actual       Decimal            @db.Decimal(19, 2)
+  mensualidades_pendientes Int
+  fecha_ajuste             DateTime           @db.Timestamp(6)
+  id_usuario               Int?
+  idRow                    BigInt             @id @default(autoincrement())
+  ajuste_anual             ajuste_anual       @relation(fields: [id_ajuste], references: [id_ajuste], onDelete: NoAction, onUpdate: NoAction, map: "fk_ajuste_anual_detalle_ajuste_anual")
+  contratos_terrenos       contratos_terrenos @relation(fields: [id_contrato], references: [id_contrato], onDelete: NoAction, onUpdate: NoAction, map: "fk_ajuste_anual_detalle_contratos_terrenos")
+  cat_usuarios             cat_usuarios?      @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_ajuste_anual_detalles_cat_usuarios")
+
+  @@index([id_ajuste], map: "fki_fk_ajuste_anual_detalle_ajuste_anual")
+  @@index([id_contrato], map: "fki_fk_ajuste_anual_detalle_contratos_terrenos")
+  @@index([id_usuario], map: "fki_fk_ajuste_anual_detalles_cat_usuarios")
+}
+
+model atencion_a_clientes {
+  id_solicitud_servicio         Int       @id @default(autoincrement())
+  id_servicio                   Int?
+  id_contrato                   Int?
+  id_usuario                    Int?
+  estado                        Int?
+  medio_solicitud               String?   @db.VarChar(60)
+  transformador                 String?   @db.VarChar(5)
+  fecha_solicitud               DateTime? @db.Date
+  fecha_marcado                 DateTime? @db.Date
+  fecha_carta_lista_entrega     DateTime? @db.Date
+  fecha_entrega_cliente         DateTime? @db.Date
+  fecha_compra                  DateTime? @db.Date
+  fecha_envio                   DateTime? @db.Date
+  fecha_carta_recepcion_cliente DateTime? @db.Date
+  fecha_instalacion_1           DateTime? @db.Date
+  fecha_instalacion_2           DateTime? @db.Date
+  fecha_solicitud_presupuesto   DateTime? @db.Date
+  fecha_presupuesto_recibido    DateTime? @db.Date
+  fecha_revision_contraloria    DateTime? @db.Date
+  fecha_presupuesto_autorizado  DateTime? @db.Date
+  fecha_entrega_paquete         DateTime? @db.Date
+  fecha_presupuesto_conexion    DateTime? @db.Date
+  fecha_pago_presupuesto        DateTime? @db.Date
+  fecha_conexion                DateTime? @db.Date
+  fecha_solicitud_contrato      DateTime? @db.Date
+  fecha_instalacion_medidor     DateTime? @db.Date
+  fecha_envio_presupuesto       DateTime? @db.Date
+  medio_envio_presupuesto       String?   @db.VarChar(80)
+  fecha_pago_anticipo           DateTime? @db.Date
+  fecha_envio_contrato_cespm    DateTime? @db.Date
+  cuenta_cespm                  String?   @db.VarChar(50)
+  fecha_descubrimiento          DateTime? @db.Date
+  fecha_medidor_cespm           DateTime? @db.Date
+  fecha_envio_solicitud_cfe     DateTime? @db.Date
+  folio_seguimiento_cfe         String?   @db.VarChar(50)
+  fecha_medidor_cfe             DateTime? @db.Date
+}
+
+model atencion_a_clientes_comentarios {
+  id_solicitud Int
+  id_usuario   Int
+  comentario   String?
+  fecha        DateTime? @db.Timestamp(6)
+  idRow        BigInt    @id @default(autoincrement())
+}
+
+model atencion_a_clientes_documentos {
+  id           Int       @id @default(autoincrement())
+  id_solicitud Int?
+  archivo      String?   @db.VarChar(140)
+  fecha_carga  DateTime? @db.Timestamp(6)
+}
+
+model atencion_a_clientes_levantamiento_servicios {
+  id                      Int     @default(autoincrement())
+  id_terreno              Int     @id
+  no_transformador        String? @db.VarChar(50)
+  transformador_instalado String? @db.VarChar(50)
+  transformador_en_uso    String? @db.VarChar(50)
+  servicio_de_luz         String? @db.VarChar(50)
+  servicio_de_agua        String? @db.VarChar(50)
+  biodigestor             String? @db.VarChar(50)
+  solicitud_de_marcado    String? @db.VarChar(50)
+  carta_finiquito         String? @db.VarChar(50)
+  escrituras              String? @db.VarChar(50)
+  clave_catastral         String? @db.VarChar(50)
+  obra_hidraulica         String? @db.VarChar(50)
+}
+
+model atencion_a_clientes_levantamiento_servicios_comentarios {
+  id_terreno Int
+  id_usuario Int
+  comentario String?
+  fecha      DateTime? @db.Timestamp(6)
+  idRow      BigInt    @id @default(autoincrement())
+}
+
+model beneficiarios {
+  id_beneficiario    Int                 @id @default(autoincrement())
+  abreviatura        String?             @db.VarChar(10)
+  nombre             String?             @db.VarChar(255)
+  ap_paterno         String?             @db.VarChar(255)
+  ap_materno         String?             @db.VarChar(255)
+  fecha_nacimiento   DateTime?           @db.Date
+  lugar_nacimiento   String?             @db.VarChar(255)
+  ocupacion          String?             @db.VarChar(255)
+  calle              String?             @db.VarChar(255)
+  numero             String?             @db.VarChar(255)
+  entre              String?             @db.VarChar(255)
+  ciudad             String?             @db.VarChar(255)
+  cp                 Int?
+  colonia            String?             @db.VarChar(255)
+  estado             String?             @db.VarChar(255)
+  pais               String?             @db.VarChar(255)
+  tel_casa           String?             @db.VarChar(25)
+  tel_cel            String?             @db.VarChar(25)
+  tel_trabajo        String?             @db.VarChar(25)
+  email              String?             @db.VarChar(255)
+  lugar_trabajo      String?             @db.VarChar(255)
+  conyuge            String?             @db.VarChar(500)
+  estado_civil       Int?
+  nacionalidad       String?             @db.VarChar(100)
+  fecha_alta         DateTime?           @db.Timestamp(6)
+  tel_cod_casa       String?             @db.VarChar(6)
+  tel_cod_cel        String?             @db.VarChar(6)
+  tel_cod_trabajo    String?             @db.VarChar(6)
+  id_usuario         Int?
+  id_terreno         Int?
+  id_contrato        Int?
+  parentesco         String?             @db.VarChar(100)
+  cat_estado_civil   cat_estado_civil?   @relation(fields: [estado_civil], references: [id_estado], onDelete: NoAction, onUpdate: NoAction, map: "fk_beneficiarios_cat_estado_civil")
+  cat_terrenos       cat_terrenos?       @relation(fields: [id_terreno], references: [id_terreno], onDelete: NoAction, onUpdate: NoAction, map: "fk_beneficiarios_cat_terrenos")
+  cat_usuarios       cat_usuarios?       @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_beneficiarios_cat_usuarios")
+  contratos_terrenos contratos_terrenos? @relation(fields: [id_contrato], references: [id_contrato], onDelete: NoAction, onUpdate: NoAction, map: "fk_beneficiarios_contratos_terrenos")
+
+  @@index([id_contrato], map: "fki_fk_beneficiarios_contratos_terrenos")
+  @@index([id_contrato], map: "contrato_idx")
+  @@index([nombre, ap_paterno, ap_materno, id_contrato], map: "nombre_beneficiario_contrato_idx")
+  @@index([nombre, ap_paterno, ap_materno], map: "nombre_beneficiario_idx")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model bitacora {
+  id_bitacora             BigInt    @default(autoincrement())
+  comentario              String?
+  fecha_comentario        DateTime? @db.Time(6)
+  id_tipo_comentario      Int?
+  id_usuario              Int?
+  prospecto_nombre        String?   @db.VarChar(125)
+  telefono                String?   @db.VarChar(20)
+  turno                   Int?
+  id_estacion             Int?
+  id_usuario_turno        Int?
+  id_usuario_turno_actual Int?
+  ap_paterno              String?   @db.VarChar(80)
+  ap_materno              String?   @db.VarChar(80)
+  reasignado              Int?
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model cadenas_recibos {
+  id_recibo          Int
+  id_contrato        Int
+  cadena_seguridad   String             @db.VarChar(120)
+  fecha_hora         DateTime           @db.Timestamp(6)
+  contratos_terrenos contratos_terrenos @relation(fields: [id_contrato], references: [id_contrato], onDelete: NoAction, onUpdate: NoAction, map: "fk_cadenas_recibos_contratos_terrenos")
+
+  @@index([id_contrato], map: "fki_fk_cadenas_recibos_contratos_terrenos")
+  @@ignore
+}
+
+model cat_causas_cancelacion {
+  id_causa           Int                  @id @default(autoincrement())
+  causa              String               @db.VarChar(255)
+  bnd_activo         Boolean
+  contratos_terrenos contratos_terrenos[]
+}
+
+model cat_cobranza_clasificacion {
+  id_clasificacion Int               @id @default(autoincrement())
+  clasificacion    String            @db.VarChar(120)
+  bnd_activo       Boolean
+  agenda_cobranza  agenda_cobranza[]
+
+  @@index([id_clasificacion], map: "idx_cat_cobranza_clasificacion")
+}
+
+model cat_cobranza_tipos_comentario {
+  id_tipo         Int               @id @default(autoincrement())
+  tipo            String            @db.VarChar(120)
+  bnd_activo      Boolean
+  agenda_cobranza agenda_cobranza[]
+}
+
+model cat_documentos {
+  id_documento       Int      @id @default(autoincrement())
+  id_fraccionamiento Int
+  id_tipo_documento  Int
+  archivo            String   @db.VarChar(255)
+  fecha_carga        DateTime @db.Timestamp(6)
+  id_usuario         Int
+}
+
+model cat_empresas {
+  id_empresa           Int                    @id(map: "CAT_EMPRESAS_pkey") @default(autoincrement())
+  nombre               String                 @db.VarChar(140)
+  razon_social         String?                @db.VarChar(140)
+  rfc                  String?                @db.VarChar(15)
+  ciudad               String?                @db.VarChar(40)
+  direccion            String?                @db.VarChar(180)
+  estado               String?                @db.VarChar(50)
+  representante_legal  String?                @db.VarChar(130)
+  telefono_principal   String?                @db.VarChar(10)
+  telefono_secundario  String?                @db.VarChar(10)
+  email                String?                @db.VarChar(120)
+  folio_recibo         String?                @db.VarChar(5)
+  folio_notas_credito  String?                @db.VarChar(5)
+  cp                   String?                @db.VarChar(5)
+  bnd_activo           Boolean
+  ajuste_anual         ajuste_anual[]
+  cat_fraccionamientos cat_fraccionamientos[]
+  cat_usuarios         cat_usuarios[]
+  contabilidad_polizas contabilidad_polizas[]
+}
+
+model cat_estado_civil {
+  id_estado      Int              @id @default(autoincrement())
+  estado         String           @db.VarChar(255)
+  bnd_activo     Boolean
+  beneficiarios  beneficiarios[]
+  clientes       clientes[]
+  copropietarios copropietarios[]
+}
+
+model cat_estatus_agenda {
+  id_estatus_agenda Int      @id @default(autoincrement())
+  estatus_agenda    String   @db.VarChar(60)
+  agenda            agenda[]
+}
+
+model cat_estatus_contrato {
+  id_estatus           Int                    @id @default(autoincrement())
+  estatus              String                 @db.VarChar(80)
+  bnd_activo           Boolean
+  contratos_terrenos   contratos_terrenos[]
+  movimientos_cabecera movimientos_cabecera[]
+}
+
+model cat_estatus_contrato_ventas {
+  id_estatus         Int                  @id @default(autoincrement())
+  estatus            String               @db.VarChar(80)
+  bnd_activo         Boolean
+  contratos_terrenos contratos_terrenos[]
+}
+
+model cat_estatus_prospecto {
+  id_estatus Int        @id @default(autoincrement())
+  estatus    String     @db.VarChar(255)
+  bnd_activo Boolean
+  clientes   clientes[]
+}
+
+model cat_estatus_terreno {
+  id_estatus   Int            @id @default(autoincrement())
+  estatus      String?        @db.VarChar(255)
+  bnd_activo   Boolean
+  cat_terrenos cat_terrenos[]
+}
+
+model cat_estatus_tomas_agua {
+  id_estatus Int    @id @default(autoincrement())
+  estatus    String @db.VarChar(120)
+}
+
+model cat_estatus_usuario {
+  id_estatus   Int            @id(map: "CAT_ESTATUS_USUARIO_pkey") @default(autoincrement())
+  estatus      String         @db.VarChar(30)
+  cat_usuarios cat_usuarios[]
+}
+
+model cat_financiamientos {
+  id_financiamiento          Int                          @id @default(autoincrement())
+  financiamiento             String                       @db.VarChar(255)
+  bnd_ajuste_anual           Boolean
+  porcentaje_ajuste_anual    Int?
+  bnd_activo                 Boolean
+  no_pagos                   Int
+  porcentaje                 Decimal                      @db.Decimal(4, 2)
+  bnd_cotizador              Boolean?
+  contrato_promocion_inicial contrato_promocion_inicial[]
+  movimientos_cabecera       movimientos_cabecera[]
+}
+
+model cat_fraccionamientos {
+  id_fraccionamiento             Int                              @id
+  fraccionamiento                String                           @db.VarChar(255)
+  nomenclatura                   String                           @db.VarChar(50)
+  pagina                         String                           @db.VarChar(255)
+  id_empresa                     Int
+  responsable                    String                           @db.VarChar(255)
+  costo_m2                       Decimal                          @db.Decimal(14, 2)
+  superficie_vendible            Decimal                          @db.Decimal(19, 3)
+  tasa_interes                   Decimal                          @db.Decimal(3, 2)
+  plano                          String                           @db.VarChar(255)
+  bnd_activo                     Boolean
+  admin_cierre_periodo_detalle   admin_cierre_periodo_detalle[]
+  ajuste_anual                   ajuste_anual[]
+  cat_empresas                   cat_empresas                     @relation(fields: [id_empresa], references: [id_empresa], onDelete: NoAction, onUpdate: NoAction, map: "fk_fraccionamientos_cat_empresas")
+  cat_manzanas                   cat_manzanas[]
+  cat_requisitos_fraccionamiento cat_requisitos_fraccionamiento[]
+  contabilidad_cuentas           contabilidad_cuentas[]
+  contrato_promocion_inicial     contrato_promocion_inicial[]
+  lista_precios                  lista_precios[]
+  servicios_fraccionamiento      servicios_fraccionamiento[]
+  sistema_traspasos              sistema_traspasos[]
+  sistema_traspasos_recibos      sistema_traspasos_recibos[]
+
+  @@index([id_fraccionamiento], map: "idx_cat_fraccionamientos_fraccionamiento")
+}
+
+model cat_manzanas {
+  id_manzana                 Int                          @id
+  no_manzana                 String                       @db.VarChar(5)
+  id_fraccionamiento         Int
+  bnd_activo                 Boolean
+  ajuste_anual               ajuste_anual[]
+  cat_fraccionamientos       cat_fraccionamientos         @relation(fields: [id_fraccionamiento], references: [id_fraccionamiento], onDelete: NoAction, onUpdate: NoAction, map: "fk_manzanas_cat_fraccionamientos")
+  cat_terrenos               cat_terrenos[]
+  contrato_promocion_inicial contrato_promocion_inicial[]
+  sistema_traspasos          sistema_traspasos[]
+  sistema_traspasos_recibos  sistema_traspasos_recibos[]
+
+  @@index([id_fraccionamiento], map: "idx_cat_manzanas_fraccionamiento")
+  @@index([id_manzana], map: "idx_cat_manzanas_manzana")
+}
+
+model cat_medios_entrega_documentos {
+  id_medio_entrega  Int                 @id @default(autoincrement())
+  medio_entrega     String              @db.VarChar(255)
+  bnd_activo        Boolean
+  sistema_traspasos sistema_traspasos[]
+}
+
+model cat_medios_publicitarios {
+  id_medio                   Int                          @id @default(autoincrement())
+  medio                      String                       @db.VarChar(255)
+  bnd_activo                 Boolean
+  clientes                   clientes[]
+  contrato_promocion_inicial contrato_promocion_inicial[]
+  contratos_terrenos         contratos_terrenos[]
+}
+
+model cat_metas_ventas {
+  id_anio    Int  @id
+  enero      Int?
+  febrero    Int?
+  marzo      Int?
+  abril      Int?
+  mayo       Int?
+  junio      Int?
+  julio      Int?
+  agosto     Int?
+  septiembre Int?
+  octubre    Int?
+  noviembre  Int?
+  diciembre  Int?
+}
+
+model cat_moneda {
+  id_moneda            Int                    @id @default(autoincrement())
+  moneda               String                 @db.VarChar(255)
+  bnd_activo           Boolean
+  cat_tipo_cambio      cat_tipo_cambio[]
+  movimientos_cabecera movimientos_cabecera[]
+}
+
+model cat_perfil_usuario {
+  id_perfil_usuario Int            @id(map: "CAT_PERFIL_USUARIO_pkey") @default(autoincrement())
+  perfil            String         @db.VarChar(40)
+  bnd_activo        Boolean
+  cat_usuarios      cat_usuarios[]
+}
+
+model cat_perfiles {
+  id_perfil  Int     @id @default(autoincrement())
+  perfil     String  @db.VarChar(255)
+  bnd_activo Boolean
+}
+
+model cat_permisos {
+  id_permiso  Int      @id @default(autoincrement())
+  permiso     String   @db.VarChar(255)
+  descripcion String?
+  bnd_activo  Boolean?
+}
+
+model cat_requisitos {
+  id_requisito                   Int                              @id @default(autoincrement())
+  requisito                      String                           @db.VarChar(255)
+  bnd_activo                     Boolean
+  cat_requisitos_fraccionamiento cat_requisitos_fraccionamiento[]
+}
+
+model cat_requisitos_fraccionamiento {
+  id_requisito_fraccionamiento       Int                                  @id @default(autoincrement())
+  id_requisito                       Int?
+  id_fraccionamiento                 Int?
+  bnd_activo                         Boolean?
+  cat_fraccionamientos               cat_fraccionamientos?                @relation(fields: [id_fraccionamiento], references: [id_fraccionamiento], onDelete: NoAction, onUpdate: NoAction, map: "fk_cat_requisitos_fraccionamiento_cat_fraccionamientos")
+  cat_requisitos                     cat_requisitos?                      @relation(fields: [id_requisito], references: [id_requisito], onDelete: NoAction, onUpdate: NoAction, map: "fk_cat_requisitos_fraccionamiento_cat_requisitos")
+  requisitos_fraccionamiento_terreno requisitos_fraccionamiento_terreno[]
+
+  @@index([id_fraccionamiento], map: "fki_fk_cat_requisitos_fraccionamiento_cat_fraccionamientos")
+  @@index([id_requisito], map: "fki_fk_cat_requisitos_fraccionamiento_cat_requisitos")
+}
+
+model cat_servicio_cliente_clasificacion {
+  id_clasificacion Int     @id @default(autoincrement())
+  clasificacion    String  @db.VarChar(120)
+  bnd_activo       Boolean
+}
+
+model cat_servicios {
+  id_servicio               Int                         @id @default(autoincrement())
+  servicio                  String                      @db.VarChar(255)
+  bnd_activo                Boolean
+  bnd_cobro                 Boolean
+  bnd_popup                 Boolean
+  consumo_agua_carga        consumo_agua_carga[]
+  servicios_fraccionamiento servicios_fraccionamiento[]
+  servicios_popup           servicios_popup[]
+}
+
+model cat_terrenos {
+  id_terreno                         Int                                  @id
+  no_terreno                         String                               @db.VarChar(35)
+  superficie                         Decimal                              @db.Decimal(14, 3)
+  precio_m2                          Decimal                              @db.Decimal(14, 2)
+  sobreprecio                        Decimal?                             @db.Decimal(14, 2)
+  total_terreno                      Decimal                              @db.Decimal(14, 2)
+  deposito                           Decimal?                             @db.Decimal(14, 2)
+  precio_financiar                   Decimal?                             @db.Decimal(14, 2)
+  calle                              String?                              @db.VarChar(255)
+  colindancia1                       String?                              @db.VarChar(255)
+  colindancia2                       String?                              @db.VarChar(255)
+  colindancia3                       String?                              @db.VarChar(255)
+  colindancia4                       String?                              @db.VarChar(255)
+  tipo_terreno                       Int
+  estatus                            Int
+  observaciones                      String?
+  bnd_activo                         Boolean
+  id_manzana                         Int
+  ajuste_anual                       ajuste_anual[]
+  beneficiarios                      beneficiarios[]
+  cat_estatus_terreno                cat_estatus_terreno                  @relation(fields: [estatus], references: [id_estatus], onDelete: NoAction, onUpdate: NoAction, map: "fk_terrenos_cat_estatus_terreno")
+  cat_manzanas                       cat_manzanas                         @relation(fields: [id_manzana], references: [id_manzana], onDelete: NoAction, onUpdate: NoAction, map: "fk_terrenos_cat_manzanas")
+  cat_tipos_terreno                  cat_tipos_terreno                    @relation(fields: [tipo_terreno], references: [id_tipo_terreno], onDelete: NoAction, onUpdate: NoAction, map: "fk_terrenos_cat_tipos_terreno")
+  contrato_promocion_inicial         contrato_promocion_inicial[]
+  contratos_terrenos                 contratos_terrenos[]
+  copropietarios                     copropietarios[]
+  fotos_terrenos                     fotos_terrenos[]
+  movimientos_cabecera               movimientos_cabecera[]
+  referencias_personales             referencias_personales[]
+  requisitos_fraccionamiento_terreno requisitos_fraccionamiento_terreno[]
+  servicios_informativos_terrenos    servicios_informativos_terrenos[]
+  sistema_traspasos                  sistema_traspasos[]
+  sistema_traspasos_recibos          sistema_traspasos_recibos[]
+
+  @@index([id_manzana], map: "idx_cat_terrenos_manzana")
+  @@index([id_terreno], map: "idx_cat_terrenos_terreno")
+}
+
+model cat_tipo_cambio {
+  id_tipo      Int        @id @default(autoincrement())
+  tipo_cambio  Decimal    @db.Decimal(4, 2)
+  fecha_inicio DateTime   @db.Timestamp(6)
+  fecha_fin    DateTime?  @db.Timestamp(6)
+  id_moneda    Int
+  bnd_activo   Boolean?
+  cat_moneda   cat_moneda @relation(fields: [id_moneda], references: [id_moneda], onDelete: NoAction, onUpdate: NoAction, map: "fk_tipo_cambio_cat_moneda")
+}
+
+model cat_tipo_pago {
+  id_tipo_pago        Int                   @id @default(autoincrement())
+  tipo                String                @db.VarChar(80)
+  bnd_activo          Boolean
+  movimientos_detalle movimientos_detalle[]
+}
+
+model cat_tipo_vencimiento {
+  id_tipo_vencimiento Int    @id @default(autoincrement())
+  vencimiento         String @db.VarChar(80)
+
+  @@index([id_tipo_vencimiento], map: "idx_cat_tipo_vencimiento")
+}
+
+model cat_tipos_comentario {
+  id_tipo_comentario Int     @id @default(autoincrement())
+  tipo               String  @db.VarChar(80)
+  bnd_activo         Boolean
+  bnd_turno          Boolean
+}
+
+model cat_tipos_documento {
+  id_tipo_documento Int     @id @default(autoincrement())
+  tipo_documento    String  @db.VarChar(150)
+  bnd_activo        Boolean
+}
+
+model cat_tipos_movimiento {
+  id_tipo_movimiento  Int                   @id @default(autoincrement())
+  movimiento          String                @db.VarChar(100)
+  bnd_activo          Boolean
+  movimientos_detalle movimientos_detalle[]
+}
+
+model cat_tipos_terreno {
+  id_tipo_terreno Int             @id @default(autoincrement())
+  tipo_terreno    String          @db.VarChar(255)
+  bnd_activo      Boolean
+  cat_terrenos    cat_terrenos[]
+  lista_precios   lista_precios[]
+}
+
+model cat_tomas_agua {
+  id_toma             Int       @id @default(autoincrement())
+  id_contrato         Int?
+  estatus             Int?
+  fecha_alta          DateTime? @db.Date
+  cont_candados_rotos Int?
+}
+
+model cat_usuarios {
+  id_usuario                                                       Int                             @unique @default(autoincrement())
+  username                                                         String                          @db.VarChar(100)
+  password                                                         String                          @db.VarChar(128)
+  nombre                                                           String                          @db.VarChar(80)
+  ap_paterno                                                       String?                         @db.VarChar(80)
+  ap_materno                                                       String?                         @db.VarChar(80)
+  email                                                            String?                         @db.VarChar(255)
+  fecha_alta                                                       DateTime                        @db.Timestamp(6)
+  fecha_pwd                                                        DateTime                        @db.Timestamp(6)
+  id_empresa                                                       Int?
+  tel_trabajo                                                      String?                         @db.VarChar(15)
+  tel_trabajo_ext                                                  String?                         @db.VarChar(5)
+  tel_celular                                                      String?                         @db.VarChar(15)
+  perfil_usuario                                                   Int?
+  estatus                                                          Int?
+  admin_cierre_periodo_cabecera                                    admin_cierre_periodo_cabecera[]
+  agenda_agenda_id_usuarioTocat_usuarios                           agenda[]                        @relation("agenda_id_usuarioTocat_usuarios")
+  agenda_agenda_id_usuario_comentarioTocat_usuarios                agenda[]                        @relation("agenda_id_usuario_comentarioTocat_usuarios")
+  agenda_cobranza_agenda_cobranza_id_usuarioTocat_usuarios         agenda_cobranza[]               @relation("agenda_cobranza_id_usuarioTocat_usuarios")
+  agenda_cobranza_agenda_cobranza_id_usuario_atendioTocat_usuarios agenda_cobranza[]               @relation("agenda_cobranza_id_usuario_atendioTocat_usuarios")
+  agua_reconexiones                                                agua_reconexiones[]
+  ajuste_anual                                                     ajuste_anual[]
+  ajuste_anual_detalle                                             ajuste_anual_detalle[]
+  beneficiarios                                                    beneficiarios[]
+  cat_empresas                                                     cat_empresas?                   @relation(fields: [id_empresa], references: [id_empresa], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuarios_cat_empresas")
+  cat_estatus_usuario                                              cat_estatus_usuario?            @relation(fields: [estatus], references: [id_estatus], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuarios_cat_estatus_usuario")
+  cat_perfil_usuario                                               cat_perfil_usuario?             @relation(fields: [perfil_usuario], references: [id_perfil_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuarios_cat_perfil_usuario")
+  clientes_clientes_id_asesor_cobranzaTocat_usuarios               clientes[]                      @relation("clientes_id_asesor_cobranzaTocat_usuarios")
+  clientes_clientes_id_usuarioTocat_usuarios                       clientes[]                      @relation("clientes_id_usuarioTocat_usuarios")
+  comentarios_caja                                                 comentarios_caja[]
+  comisiones_comisiones_asesor_primarioTocat_usuarios              comisiones[]                    @relation("comisiones_asesor_primarioTocat_usuarios")
+  comisiones_comisiones_asesor_secundarioTocat_usuarios            comisiones[]                    @relation("comisiones_asesor_secundarioTocat_usuarios")
+  comisiones_pagos                                                 comisiones_pagos[]
+  consumo_agua_carga                                               consumo_agua_carga[]
+  contratos_terrenos                                               contratos_terrenos[]
+  copropietarios                                                   copropietarios[]
+  fotos_terrenos                                                   fotos_terrenos[]
+  referencias_personales                                           referencias_personales[]
+  reubicaciones                                                    reubicaciones[]
+  servicios_popup_servicios_popup_usuario_entregaTocat_usuarios    servicios_popup[]               @relation("servicios_popup_usuario_entregaTocat_usuarios")
+  servicios_popup_servicios_popup_id_usuarioTocat_usuarios         servicios_popup[]               @relation("servicios_popup_id_usuarioTocat_usuarios")
+  sistema_traspasos_recibos                                        sistema_traspasos_recibos[]
+  traspasos                                                        traspasos[]
+
+  @@id([id_usuario, username])
+  @@index([nombre, ap_paterno, ap_materno], map: "nombre_usuario_idx")
+  @@index([id_usuario], map: "idx_usuarios_usuario")
+}
+
+model cat_ventas_clasificacion {
+  id_clasificacion Int      @id @default(autoincrement())
+  clasificacion    String   @db.VarChar(100)
+  bnd_activo       Boolean
+  agenda           agenda[]
+}
+
+model clientes {
+  id_cliente                                             Int                                  @id @default(autoincrement())
+  abreviatura                                            String?                              @db.VarChar(10)
+  nombre                                                 String?                              @db.VarChar(255)
+  ap_paterno                                             String?                              @db.VarChar(255)
+  ap_materno                                             String?                              @db.VarChar(255)
+  fecha_nacimiento                                       DateTime?                            @db.Date
+  sexo                                                   String?                              @db.VarChar(10)
+  lugar_nacimiento                                       String?                              @db.VarChar(255)
+  ocupacion                                              String?                              @db.VarChar(255)
+  calle                                                  String?                              @db.VarChar(255)
+  numero                                                 String?                              @db.VarChar(255)
+  entre                                                  String?                              @db.VarChar(255)
+  ciudad                                                 String?                              @db.VarChar(255)
+  cp                                                     Int?
+  colonia                                                String?                              @db.VarChar(255)
+  estado                                                 String?                              @db.VarChar(255)
+  pais                                                   String?                              @db.VarChar(255)
+  tel_casa                                               String?                              @db.VarChar(25)
+  tel_cel                                                String?                              @db.VarChar(25)
+  tel_trabajo                                            String?                              @db.VarChar(25)
+  email                                                  String?                              @db.VarChar(255)
+  lugar_trabajo                                          String?                              @db.VarChar(255)
+  domicilio_trabajo                                      String?
+  conyuge                                                String?                              @db.VarChar(500)
+  estado_civil                                           Int?
+  nacionalidad                                           String?                              @db.VarChar(100)
+  fecha_alta                                             DateTime?                            @db.Timestamp(6)
+  tel_cod_casa                                           String?                              @db.VarChar(50)
+  tel_cod_cel                                            String?                              @db.VarChar(50)
+  tel_cod_trabajo                                        String?                              @db.VarChar(50)
+  id_usuario                                             Int
+  bnd_activo                                             Boolean?
+  ultima_modificacion                                    DateTime?                            @default(now()) @db.Timestamp(6)
+  id_estatus_prospecto                                   Int?
+  bnd_interesado_prospecto                               Boolean?
+  id_medio_publicitario                                  Int?
+  tel_usa_cel                                            Boolean?
+  tel_usa_casa                                           Boolean?
+  tel_usa_oficina                                        Boolean?
+  notas                                                  String?
+  fecha_correo                                           DateTime?                            @db.Timestamp(6)
+  id_asesor_cobranza                                     Int?
+  agenda                                                 agenda[]
+  cat_usuarios_clientes_id_asesor_cobranzaTocat_usuarios cat_usuarios?                        @relation("clientes_id_asesor_cobranzaTocat_usuarios", fields: [id_asesor_cobranza], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_clientes_asesor_cat_usuarios")
+  cat_estado_civil                                       cat_estado_civil?                    @relation(fields: [estado_civil], references: [id_estado], onDelete: NoAction, onUpdate: NoAction, map: "fk_clientes_cat_estado_civil")
+  cat_estatus_prospecto                                  cat_estatus_prospecto?               @relation(fields: [id_estatus_prospecto], references: [id_estatus], onDelete: NoAction, onUpdate: NoAction, map: "fk_clientes_cat_estatus_prospecto")
+  cat_medios_publicitarios                               cat_medios_publicitarios?            @relation(fields: [id_medio_publicitario], references: [id_medio], onDelete: NoAction, onUpdate: NoAction, map: "fk_clientes_cat_medios_publicitarios")
+  cat_usuarios_clientes_id_usuarioTocat_usuarios         cat_usuarios                         @relation("clientes_id_usuarioTocat_usuarios", fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_clientes_vendedor_cat_usuarios")
+  contratos_terrenos                                     contratos_terrenos[]
+  copropietarios                                         copropietarios[]
+  movimientos_cabecera                                   movimientos_cabecera[]
+  requisitos_fraccionamiento_terreno                     requisitos_fraccionamiento_terreno[]
+  traspasos_traspasos_id_cliente_anteriorToclientes      traspasos[]                          @relation("traspasos_id_cliente_anteriorToclientes")
+  traspasos_traspasos_id_cliente_nuevoToclientes         traspasos[]                          @relation("traspasos_id_cliente_nuevoToclientes")
+
+  @@index([nombre, ap_paterno, ap_materno], map: "nombre_cliente_idx")
+  @@index([id_asesor_cobranza], map: "idx_clientes_asesor")
+  @@index([id_cliente], map: "idx_clientes_cliente")
+  @@index([nombre, ap_paterno, ap_materno], map: "idx_clientes_nombre_apellidos")
+}
+
+model cobranza_cartas_conceptos {
+  id_concepto        Int                 @id @default(autoincrement())
+  concepto           String?             @db.VarChar(255)
+  id_contrato        Int?
+  monto              Decimal?            @db.Decimal(14, 2)
+  orden              Int?
+  contratos_terrenos contratos_terrenos? @relation(fields: [id_contrato], references: [id_contrato], onDelete: NoAction, onUpdate: NoAction, map: "fk_cobranza_cartas_conceptos_contratos_terrenos")
+
+  @@index([id_contrato], map: "fki_fk_cobranza_cartas_conceptos_contratos_terrenos")
+}
+
+model cobranza_cartas_devolucion {
+  id_contrato                  Int?
+  monto_devolucion             Decimal?            @db.Decimal(14, 2)
+  fecha_carta                  DateTime?           @db.Timestamp(6)
+  id_usuario                   Int?
+  monto_cargo                  Decimal?            @db.Decimal(14, 2)
+  no_pagos                     Int?
+  porcentaje_cargo_cancelacion Decimal?            @db.Decimal(14, 2)
+  notas1                       String?
+  notas2                       String?
+  idRow                        BigInt              @id @default(autoincrement())
+  contratos_terrenos           contratos_terrenos? @relation(fields: [id_contrato], references: [id_contrato], onDelete: NoAction, onUpdate: NoAction, map: "fk_cobranza_cartas_devolucion_contratos_terrenos")
+
+  @@index([id_contrato], map: "fki_fk_cobranza_cartas_devolucion_contratos_terrenos")
+}
+
+model cobranza_cartas_pagos {
+  id_pago            Int                 @id @default(autoincrement())
+  id_contrato        Int?
+  no_pago            Int?
+  monto              Decimal?            @db.Decimal(14, 2)
+  fecha_pago         DateTime?           @db.Date
+  comentarios        String?
+  contratos_terrenos contratos_terrenos? @relation(fields: [id_contrato], references: [id_contrato], onDelete: NoAction, onUpdate: NoAction, map: "fk_cobranza_cartas_pagos_contratos_terrenos")
+
+  @@index([id_contrato], map: "fki_fk_cobranza_cartas_pagos_contratos_terrenos")
+}
+
+model cobranza_compromisos_pago {
+  id_compromiso      Int                 @id @default(autoincrement())
+  id_contrato        Int?
+  fecha_compromiso   DateTime?           @db.Timestamp(6)
+  monto              Decimal?            @db.Decimal(19, 2)
+  bnd_pagado         Boolean?
+  fecha_pago         DateTime?           @db.Timestamp(6)
+  no_recibo          Int?
+  bnd_activo         Boolean?
+  comentarios        String?
+  fecha_movimiento   DateTime?           @db.Timestamp(6)
+  contratos_terrenos contratos_terrenos? @relation(fields: [id_contrato], references: [id_contrato], onDelete: NoAction, onUpdate: NoAction, map: "fk_cobranza_compromisos_pago_contratos_terrenos")
+
+  @@index([id_contrato], map: "fki_fk_cobranza_compromisos_pago_contratos_terrenos")
+  @@index([bnd_activo], map: "idx_cobranza_compromisos_activo")
+  @@index([id_contrato], map: "idx_cobranza_compromisos_contrato")
+  @@index([fecha_compromiso], map: "idx_cobranza_compromisos_fecha")
+}
+
+model comentarios_caja {
+  id_comentario      Int                 @id @default(autoincrement())
+  comentario         String?
+  fecha_comentario   DateTime?           @db.Timestamp(6)
+  id_usuario         Int?
+  id_contrato        Int?
+  cat_usuarios       cat_usuarios?       @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_comentarios_caja_cat_usuarios")
+  contratos_terrenos contratos_terrenos? @relation(fields: [id_contrato], references: [id_contrato], onDelete: NoAction, onUpdate: NoAction, map: "fk_comentarios_caja_contratos_terrenos")
+
+  @@index([id_usuario], map: "fki_fk_comentarios_caja_cat_usuarios")
+  @@index([id_contrato], map: "fki_fk_comentarios_caja_contratos_terrenos")
+}
+
+model comisiones {
+  id_comision                                             Int                @id @default(autoincrement())
+  id_contrato                                             Int
+  no_comision                                             Int
+  periodo                                                 DateTime           @db.Date
+  bnd_activo                                              Boolean?
+  bnd_pagado_primario                                     Boolean?
+  bnd_pagado_secundario                                   Boolean?
+  asesor_primario                                         Int?
+  asesor_secundario                                       Int?
+  monto_primario                                          Decimal?           @db.Decimal(19, 2)
+  monto_secundario                                        Decimal?           @db.Decimal(19, 2)
+  fecha_pago_primario                                     DateTime?          @db.Date
+  fecha_pago_secundario                                   DateTime?          @db.Date
+  bnd_bloqueo                                             Boolean?
+  bnd_mensualidad_pagada                                  Boolean?
+  bnd_contrato_firmado                                    Boolean?
+  monto_pagado_primario                                   Decimal?           @db.Decimal(19, 2)
+  monto_pagado_secundario                                 Decimal?           @db.Decimal(19, 2)
+  monto_original                                          Decimal?           @db.Decimal(19, 2)
+  cat_usuarios_comisiones_asesor_primarioTocat_usuarios   cat_usuarios?      @relation("comisiones_asesor_primarioTocat_usuarios", fields: [asesor_primario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_comisiones_cat_usuarios_asesor_primario")
+  cat_usuarios_comisiones_asesor_secundarioTocat_usuarios cat_usuarios?      @relation("comisiones_asesor_secundarioTocat_usuarios", fields: [asesor_secundario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_comisiones_cat_usuarios_asesor_secundario")
+  contratos_terrenos                                      contratos_terrenos @relation(fields: [id_contrato], references: [id_contrato], onDelete: NoAction, onUpdate: NoAction, map: "fk_comisiones_contratos_terrenos")
+
+  @@index([asesor_primario], map: "fki_fk_comisiones_cat_usuarios_asesor_primario")
+  @@index([asesor_secundario], map: "fki_fk_comisiones_cat_usuarios_asesor_secundario")
+  @@index([id_contrato], map: "fki_fk_comisiones_contratos_terrenos")
+  @@index([asesor_primario], map: "asesor_primario_idx")
+  @@index([asesor_secundario], map: "asesor_secundario_idx")
+}
+
+model comisiones_configuracion {
+  id_configuracion       Int     @id @default(autoincrement())
+  no_meses               Int
+  comision_monto         Decimal @db.Decimal(19, 2)
+  comision_contado_monto Decimal @db.Decimal(19, 2)
+}
+
+model comisiones_pagos {
+  id_pago      Int          @id @default(autoincrement())
+  id_contrato  Int
+  no_comision  Int
+  monto        Decimal      @db.Decimal(19, 2)
+  asesor       Int
+  fecha_pago   DateTime     @db.Timestamp(6)
+  cat_usuarios cat_usuarios @relation(fields: [asesor], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_comisiones_pagos_cat_usuarios")
+
+  @@index([asesor], map: "fki_fk_comisiones_pagos_cat_usuarios")
+  @@index([asesor], map: "asesor_idx")
+  @@index([id_contrato], map: "id_contrato_idx")
+}
+
+model consumo_agua_carga {
+  id_carga           Int                 @id @default(autoincrement())
+  fecha_carga        DateTime?           @db.Date
+  id_contrato        Int?
+  no_medidor         String?             @db.VarChar(25)
+  lectura_anterior   Decimal?            @db.Decimal(19, 2)
+  lectura_actual     Decimal?            @db.Decimal(19, 2)
+  fecha_lectura      DateTime?           @db.Date
+  observaciones      String?
+  periodo            DateTime?           @db.Date
+  id_usuario         Int?
+  id_servicio        Int?
+  consumo_m3         Int?
+  consumo_monto      Decimal?            @db.Decimal(19, 2)
+  cat_servicios      cat_servicios?      @relation(fields: [id_servicio], references: [id_servicio], onDelete: NoAction, onUpdate: NoAction, map: "fk_consumo_agua_carga_cat_servicios")
+  cat_usuarios       cat_usuarios?       @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_consumo_agua_carga_cat_usuarios")
+  contratos_terrenos contratos_terrenos? @relation(fields: [id_contrato], references: [id_contrato], onDelete: NoAction, onUpdate: NoAction, map: "fk_consumo_agua_carga_contratos_terrenos")
+
+  @@index([id_servicio], map: "fki_fk_consumo_agua_carga_cat_servicios")
+  @@index([id_usuario], map: "fki_fk_consumo_agua_carga_cat_usuarios")
+  @@index([id_contrato], map: "fki_fk_consumo_agua_carga_contratos_terrenos")
+}
+
+model consumo_agua_config {
+  precio_m3    Decimal? @db.Decimal(19, 2)
+  minimo_pesos Decimal? @db.Decimal(19, 2)
+  minimo_m3    Int?
+  idRow        BigInt   @id @default(autoincrement())
+}
+
+model consumo_agua_lecturas {
+  id_carga              Int       @id @default(autoincrement())
+  id_toma               Int?
+  lectura               Int?
+  fecha_lectura         DateTime? @db.Timestamp(6)
+  observaciones         String?
+  fotos                 Json?
+  importe               Decimal?  @db.Decimal(19, 2)
+  usuario_carga         Int?
+  periodo_lectura       Int?
+  periodo_lectura_anio  Int?
+  estatus_lectura       Int?
+  id_movimiento_detalle Int?
+}
+
+model contabilidad_conceptos {
+  id_concepto          Int                    @id @default(autoincrement())
+  concepto             String                 @db.VarChar(100)
+  bnd_activo           Boolean
+  contabilidad_cuentas contabilidad_cuentas[]
+}
+
+model contabilidad_cuentas {
+  id_cuenta              Int                     @id @default(autoincrement())
+  cuenta                 String?                 @db.VarChar(100)
+  id_fraccionamiento     Int?
+  id_concepto            Int?
+  tipo_cuenta            Int?
+  id_moneda              Int?
+  bnd_historico          Boolean?
+  bnd_activo             Boolean?
+  cat_fraccionamientos   cat_fraccionamientos?   @relation(fields: [id_fraccionamiento], references: [id_fraccionamiento], onDelete: NoAction, onUpdate: NoAction, map: "fk_contabilidad_cuentas_cat_fraccionamientos")
+  contabilidad_conceptos contabilidad_conceptos? @relation(fields: [id_concepto], references: [id_concepto], onDelete: NoAction, onUpdate: NoAction, map: "fk_contabilidad_cuentas_contabilidad_conceptos")
+
+  @@index([id_fraccionamiento], map: "fki_fk_contabilidad_cuentas_cat_fraccionamientos")
+  @@index([id_concepto], map: "fki_fk_contabilidad_cuentas_contabilidad_conceptos")
+}
+
+model contabilidad_polizas {
+  id_poliza           Int           @id @default(autoincrement())
+  fecha_inicio        DateTime?     @db.Date
+  fecha_fin           DateTime?     @db.Date
+  id_empresa          Int?
+  folio               String?       @db.VarChar(25)
+  tipo_cambio         Decimal?      @db.Decimal(19, 2)
+  concepto_poliza     String?       @db.VarChar(255)
+  concepto_movimiento String?       @db.VarChar(255)
+  bnd_activo          Boolean?
+  bnd_contabilizado   Boolean?
+  cat_empresas        cat_empresas? @relation(fields: [id_empresa], references: [id_empresa], onDelete: NoAction, onUpdate: NoAction, map: "fk_contabilidad_polizas_cat_empresas")
+
+  @@index([id_empresa], map: "fki_fk_contabilidad_polizas_cat_empresas")
+}
+
+model contrato_promocion_inicial {
+  id_contrato              Int                       @id
+  id_fraccionamiento       Int?
+  id_manzana               Int?
+  id_terreno               Int?
+  monto_terreno            Decimal?                  @db.Decimal(19, 2)
+  costo_financiero         Decimal?                  @db.Decimal(19, 2)
+  id_financiamiento        Int?
+  pagos                    Int?
+  pago_inicial             Decimal?                  @db.Decimal(19, 2)
+  fecha_primer_pago        DateTime?                 @db.Timestamp(6)
+  mensualidad              Decimal?                  @db.Decimal(19, 2)
+  interes_diario           Decimal?                  @db.Decimal(14, 2)
+  descuento_pesos          Decimal?                  @db.Decimal(19, 2)
+  descuento_porcentaje     Decimal?                  @db.Decimal(14, 2)
+  moneda                   String?                   @db.VarChar(25)
+  id_medio_publicitario    Int?
+  id_estatus_ventas        Int?
+  cat_financiamientos      cat_financiamientos?      @relation(fields: [id_financiamiento], references: [id_financiamiento], onDelete: NoAction, onUpdate: NoAction, map: "fk_contrato_promocion_inicial_cat_financiamientos")
+  cat_fraccionamientos     cat_fraccionamientos?     @relation(fields: [id_fraccionamiento], references: [id_fraccionamiento], onDelete: NoAction, onUpdate: NoAction, map: "fk_contrato_promocion_inicial_cat_fraccionamientos")
+  cat_manzanas             cat_manzanas?             @relation(fields: [id_manzana], references: [id_manzana], onDelete: NoAction, onUpdate: NoAction, map: "fk_contrato_promocion_inicial_cat_manzanas")
+  cat_medios_publicitarios cat_medios_publicitarios? @relation(fields: [id_medio_publicitario], references: [id_medio], onDelete: NoAction, onUpdate: NoAction, map: "fk_contrato_promocion_inicial_cat_medios_publicitarios")
+  cat_terrenos             cat_terrenos?             @relation(fields: [id_terreno], references: [id_terreno], onDelete: NoAction, onUpdate: NoAction, map: "fk_contrato_promocion_inicial_cat_terrenos")
+  contratos_terrenos       contratos_terrenos        @relation(fields: [id_contrato], references: [id_contrato], onDelete: NoAction, onUpdate: NoAction, map: "fk_contrato_promocion_inicial_contratos_terrenos")
+
+  @@index([id_financiamiento], map: "fki_fk_contrato_promocion_inicial_cat_financiamientos")
+  @@index([id_fraccionamiento], map: "fki_fk_contrato_promocion_inicial_cat_fraccionamientos")
+  @@index([id_manzana], map: "fki_fk_contrato_promocion_inicial_cat_manzanas")
+  @@index([id_medio_publicitario], map: "fki_fk_contrato_promocion_inicial_cat_medios_publicitarios")
+  @@index([id_terreno], map: "fki_fk_contrato_promocion_inicial_cat_terrenos")
+  @@index([id_contrato], map: "fki_fk_contrato_promocion_inicial_contratos_terrenos")
+}
+
+model contratos_terrenos {
+  id_contrato                                                          Int                                  @id @default(autoincrement())
+  id_terreno                                                           Int
+  id_estatus_contrato                                                  Int?
+  id_cliente                                                           Int?
+  fecha_contrato                                                       DateTime?                            @db.Timestamp(6)
+  bnd_activo                                                           Boolean?
+  fecha_firma                                                          DateTime?                            @db.Date
+  bloqueo_caja                                                         Boolean?
+  bnd_cancelado                                                        Boolean?
+  vendedor                                                             Int?
+  vendedor_compartido                                                  Int?
+  id_causa_cancelacion                                                 Int?
+  comentarios_cancelacion                                              String?
+  id_estatus_ventas                                                    Int?
+  fecha_cancelacion                                                    DateTime?                            @db.Date
+  id_medio_publicitario                                                Int?
+  bnd_contrato_entregado                                               Boolean?
+  bnd_descuentos                                                       Boolean?
+  id_usuario_cancelacion                                               Int?
+  nota                                                                 String?
+  agenda_cobranza                                                      agenda_cobranza[]
+  ajuste_anual_detalle                                                 ajuste_anual_detalle[]
+  beneficiarios                                                        beneficiarios[]
+  cadenas_recibos                                                      cadenas_recibos[]                    @ignore
+  cobranza_cartas_conceptos                                            cobranza_cartas_conceptos[]
+  cobranza_cartas_devolucion                                           cobranza_cartas_devolucion[]
+  cobranza_cartas_pagos                                                cobranza_cartas_pagos[]
+  cobranza_compromisos_pago                                            cobranza_compromisos_pago[]
+  comentarios_caja                                                     comentarios_caja[]
+  comisiones                                                           comisiones[]
+  consumo_agua_carga                                                   consumo_agua_carga[]
+  contrato_promocion_inicial                                           contrato_promocion_inicial?
+  cat_causas_cancelacion                                               cat_causas_cancelacion?              @relation(fields: [id_causa_cancelacion], references: [id_causa], onDelete: NoAction, onUpdate: NoAction, map: "fk_contratos_terrenos_cat_causas_cancelacion")
+  cat_estatus_contrato                                                 cat_estatus_contrato?                @relation(fields: [id_estatus_contrato], references: [id_estatus], onDelete: NoAction, onUpdate: NoAction, map: "fk_contratos_terrenos_cat_estatus_contrato")
+  cat_estatus_contrato_ventas                                          cat_estatus_contrato_ventas?         @relation(fields: [id_estatus_ventas], references: [id_estatus], onDelete: NoAction, onUpdate: NoAction, map: "fk_contratos_terrenos_cat_estatus_contrato_ventas")
+  cat_medios_publicitarios                                             cat_medios_publicitarios?            @relation(fields: [id_medio_publicitario], references: [id_medio], onDelete: NoAction, onUpdate: NoAction, map: "fk_contratos_terrenos_cat_medios_publicitarios")
+  cat_terrenos                                                         cat_terrenos                         @relation(fields: [id_terreno], references: [id_terreno], onDelete: NoAction, onUpdate: NoAction, map: "fk_contratos_terrenos_cat_terrenos")
+  cat_usuarios                                                         cat_usuarios?                        @relation(fields: [id_usuario_cancelacion], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_contratos_terrenos_cat_usuarios")
+  clientes                                                             clientes?                            @relation(fields: [id_cliente], references: [id_cliente], onDelete: NoAction, onUpdate: NoAction, map: "fk_contratos_terrenos_clientes")
+  copropietarios                                                       copropietarios[]
+  movimientos_cabecera                                                 movimientos_cabecera[]
+  movimientos_detalle                                                  movimientos_detalle[]
+  referencias_personales                                               referencias_personales[]
+  requisitos_fraccionamiento_terreno                                   requisitos_fraccionamiento_terreno[]
+  reubicaciones_reubicaciones_id_contrato_anteriorTocontratos_terrenos reubicaciones[]                      @relation("reubicaciones_id_contrato_anteriorTocontratos_terrenos")
+  reubicaciones_reubicaciones_id_contrato_nuevoTocontratos_terrenos    reubicaciones[]                      @relation("reubicaciones_id_contrato_nuevoTocontratos_terrenos")
+  servicios_popup                                                      servicios_popup[]
+  traspasos                                                            traspasos[]
+
+  @@index([id_causa_cancelacion], map: "fki_fk_contratos_terrenos_cat_causas_cancelacion")
+  @@index([id_estatus_contrato], map: "fki_fk_contratos_terrenos_cat_estatus_contrato")
+  @@index([id_estatus_ventas], map: "fki_fk_contratos_terrenos_cat_estatus_contrato_ventas")
+  @@index([id_medio_publicitario], map: "fki_fk_contratos_terrenos_cat_medios_publicitarios")
+  @@index([id_terreno], map: "fki_fk_contratos_terrenos_cat_terrenos")
+  @@index([id_usuario_cancelacion], map: "fki_fk_contratos_terrenos_cat_usuarios")
+  @@index([id_cliente], map: "fki_fk_contratos_terrenos_clientes")
+  @@index([id_cliente], map: "id_cliente_idx")
+  @@index([id_terreno], map: "id_terreno_idx")
+  @@index([bnd_cancelado], map: "idx_contratos_terrenos_cancelado")
+  @@index([id_cliente], map: "idx_contratos_terrenos_cliente")
+  @@index([id_contrato], map: "idx_contratos_terrenos_contrato")
+  @@index([id_terreno], map: "idx_contratos_terrenos_terreno")
+}
+
+model copropietarios {
+  id_copropietario       Int                 @id @default(autoincrement())
+  abreviatura            String?             @db.VarChar(10)
+  nombre                 String?             @db.VarChar(255)
+  ap_paterno             String?             @db.VarChar(255)
+  ap_materno             String?             @db.VarChar(255)
+  fecha_nacimiento       DateTime?           @db.Date
+  lugar_nacimiento       String?             @db.VarChar(255)
+  ocupacion              String?             @db.VarChar(255)
+  calle                  String?             @db.VarChar(255)
+  numero                 String?             @db.VarChar(255)
+  ciudad                 String?             @db.VarChar(255)
+  cp                     Int?
+  colonia                String?             @db.VarChar(255)
+  estado                 String?             @db.VarChar(255)
+  pais                   String?             @db.VarChar(255)
+  tel_casa               String?             @db.VarChar(25)
+  tel_cel                String?             @db.VarChar(25)
+  tel_trabajo            String?             @db.VarChar(25)
+  email                  String?             @db.VarChar(255)
+  lugar_trabajo          String?             @db.VarChar(255)
+  domicilio_trabajo      String?
+  conyuge                String?             @db.VarChar(500)
+  estado_civil           Int?
+  nacionalidad           String?             @db.VarChar(100)
+  fecha_alta             DateTime?           @db.Timestamp(6)
+  tel_cod_casa           String?             @db.VarChar(6)
+  tel_cod_cel            String?             @db.VarChar(6)
+  tel_cod_trabajo        String?             @db.VarChar(6)
+  id_usuario             Int?
+  bnd_principal          Boolean?
+  bnd_activo             Boolean?
+  bnd_permiso            Boolean?
+  bnd_manual             Boolean?
+  bnd_copia_contrato     Boolean?
+  bnd_conexion_electrica Boolean?
+  bnd_toma_agua          Boolean?
+  bnd_biodigestor        Boolean?
+  id_cliente             Int?
+  id_terreno             Int?
+  id_contrato            Int?
+  sexo                   String?             @db.VarChar(10)
+  cat_estado_civil       cat_estado_civil?   @relation(fields: [estado_civil], references: [id_estado], onDelete: NoAction, onUpdate: NoAction, map: "fk_copropietarios_cat_estado_civil")
+  cat_terrenos           cat_terrenos?       @relation(fields: [id_terreno], references: [id_terreno], onDelete: NoAction, onUpdate: NoAction, map: "fk_copropietarios_cat_terrenos")
+  cat_usuarios           cat_usuarios?       @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_copropietarios_cat_usuarios")
+  clientes               clientes?           @relation(fields: [id_cliente], references: [id_cliente], onDelete: NoAction, onUpdate: NoAction, map: "fk_copropietarios_clientes")
+  contratos_terrenos     contratos_terrenos? @relation(fields: [id_contrato], references: [id_contrato], onDelete: NoAction, onUpdate: NoAction, map: "fk_copropietarios_contratos_terrenos")
+
+  @@index([estado_civil], map: "fki_fk_copropietarios_cat_estado_civil")
+  @@index([id_terreno], map: "fki_fk_copropietarios_cat_terrenos")
+  @@index([id_usuario], map: "fki_fk_copropietarios_cat_usuarios")
+  @@index([id_cliente], map: "fki_fk_copropietarios_clientes")
+  @@index([id_contrato], map: "fki_fk_copropietarios_contratos_terrenos")
+}
+
+model fotos_terrenos {
+  id_foto        Int          @id(map: "fotos_terreno_pkey") @default(autoincrement())
+  id_terreno     Int
+  nombre_archivo String       @db.VarChar(255)
+  ruta_archivo   String       @db.VarChar(255)
+  comentarios    String?
+  id_usuario     Int
+  fecha_carga    DateTime     @db.Timestamp(6)
+  cat_terrenos   cat_terrenos @relation(fields: [id_terreno], references: [id_terreno], onDelete: NoAction, onUpdate: NoAction, map: "fk_fotos_terrenos_cat_terrenos")
+  cat_usuarios   cat_usuarios @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_fotos_terrenos_cat_usuarios")
+
+  @@index([id_terreno], map: "fki_fk_fotos_terrenos_cat_terrenos")
+  @@index([id_usuario], map: "fki_fk_fotos_terrenos_cat_usuarios")
+}
+
+model lista_precios {
+  id_fraccionamiento   Int
+  id_tipo_terreno      Int
+  precio_m2            Decimal              @db.Decimal(19, 2)
+  idRow                BigInt               @id @default(autoincrement())
+  cat_fraccionamientos cat_fraccionamientos @relation(fields: [id_fraccionamiento], references: [id_fraccionamiento], onDelete: NoAction, onUpdate: NoAction, map: "fk_lista_precios_cat_fraccionamientos")
+  cat_tipos_terreno    cat_tipos_terreno    @relation(fields: [id_tipo_terreno], references: [id_tipo_terreno], onDelete: NoAction, onUpdate: NoAction, map: "fk_lista_precios_cat_tipos_terreno")
+
+  @@index([id_tipo_terreno], map: "fki_fk_lista_precios_cat_tipos_terreno")
+}
+
+model movimientos_cabecera {
+  id_movimiento_cabecera BigInt                @id @default(autoincrement())
+  id_terreno             Int?
+  id_cliente             Int?
+  monto_terreno_inicial  Decimal?              @db.Decimal(19, 2)
+  monto_terreno_actual   Decimal?              @db.Decimal(19, 2)
+  id_financiamiento      Int?
+  id_estatus_contrato    Int?
+  fecha_inicio           DateTime?             @db.Timestamp(6)
+  mensualidad_inicial    Decimal?              @db.Decimal(19, 2)
+  mensualidad_actual     Decimal?              @db.Decimal(19, 2)
+  descuento_monto        Decimal?              @db.Decimal(19, 2)
+  descuento_porcentaje   Decimal?              @db.Decimal(14, 2)
+  moneda                 Int?
+  tasa_interes_diario    Decimal?              @db.Decimal(14, 2)
+  bnd_indexa             Boolean?
+  monto_financiar        Decimal?              @db.Decimal(19, 2)
+  no_pagos               Int?
+  id_contrato            Int?
+  saldo                  Decimal?              @db.Decimal(19, 2)
+  mes_ajuste_anual       Int?
+  precio_m2_inicial      Decimal?              @db.Decimal(19, 2)
+  cat_estatus_contrato   cat_estatus_contrato? @relation(fields: [id_estatus_contrato], references: [id_estatus], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimientos_cabecera_cat_estatus_contrato")
+  cat_financiamientos    cat_financiamientos?  @relation(fields: [id_financiamiento], references: [id_financiamiento], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimientos_cabecera_cat_financiamientos")
+  cat_moneda             cat_moneda?           @relation(fields: [moneda], references: [id_moneda], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimientos_cabecera_cat_moneda")
+  cat_terrenos           cat_terrenos?         @relation(fields: [id_terreno], references: [id_terreno], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimientos_cabecera_cat_terrenos")
+  clientes               clientes?             @relation(fields: [id_cliente], references: [id_cliente], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimientos_cabecera_clientes")
+  contratos_terrenos     contratos_terrenos?   @relation(fields: [id_contrato], references: [id_contrato], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimientos_cabecera_contratos_terrenos")
+  movimientos_detalle    movimientos_detalle[]
+
+  @@index([id_cliente], map: "fki_fk_movimiento_cabecera_clientes")
+  @@index([id_estatus_contrato], map: "fki_fk_movimientos_cabecera_cat_estatus_contrato")
+  @@index([id_financiamiento], map: "fki_fk_movimientos_cabecera_cat_financiamientos")
+  @@index([moneda], map: "fki_fk_movimientos_cabecera_cat_moneda")
+  @@index([id_terreno], map: "fki_fk_movimientos_cabecera_cat_terrenos")
+  @@index([id_contrato], map: "fki_fk_movimientos_cabecera_contratos_terrenos")
+  @@index([id_contrato], map: "idx_movimientos_cabecera_contrato")
+}
+
+model movimientos_detalle {
+  id_movimiento_detalle            BigInt                @id @default(autoincrement())
+  id_movimiento_cabecera           BigInt?
+  no_pago                          Int?
+  id_tipo_movimiento               Int?
+  monto                            Decimal?              @db.Decimal(19, 2)
+  fecha_movimiento                 DateTime?             @db.Timestamp(6)
+  bnd_activo                       Boolean?
+  usuario                          Int?
+  id_contrato                      Int?
+  bnd_pagado                       Boolean?
+  no_recibo                        Int?
+  monto_saldo                      Decimal?              @db.Decimal(19, 2)
+  descuento_tipo                   Boolean?
+  dias_interes_pagados             Decimal?              @db.Decimal(19, 2)
+  justificacion_descuento          String?
+  id_tipo_pago                     Int?
+  referencia                       String?               @db.VarChar(255)
+  id_ult_ajuste_anual              Int?
+  saldo_recibo                     Decimal?              @db.Decimal(19, 2)
+  id_servicio                      Int?
+  tipo_cambio                      Decimal?              @db.Decimal(19, 2)
+  descuento_mensualidad            Decimal?              @db.Decimal(19, 2)
+  descuento_interes                Decimal?              @db.Decimal(19, 2)
+  monto_efectivo                   Decimal?              @db.Decimal(19, 2)
+  monto_cheque                     Decimal?              @db.Decimal(19, 2)
+  monto_dlls                       Decimal?              @db.Decimal(19, 2)
+  id_carga                         Int?
+  no_medidor                       String?               @db.VarChar(255)
+  id_poliza                        Int?
+  impresion                        Int?
+  justificacion_cancelacion_recibo String?
+  justificacion_nota               String?
+  bnd_contrato_cancelado           Boolean?
+  cat_tipo_pago                    cat_tipo_pago?        @relation(fields: [id_tipo_pago], references: [id_tipo_pago], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimientos_detalle_cat_tipo_pago")
+  cat_tipos_movimiento             cat_tipos_movimiento? @relation(fields: [id_tipo_movimiento], references: [id_tipo_movimiento], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimientos_detalle_cat_tipos_movimiento")
+  contratos_terrenos               contratos_terrenos?   @relation(fields: [id_contrato], references: [id_contrato], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimientos_detalle_contratos_terrenos")
+  movimientos_cabecera             movimientos_cabecera? @relation(fields: [id_movimiento_cabecera], references: [id_movimiento_cabecera], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimientos_detalle_movimientos_cabecera")
+
+  @@index([id_tipo_pago], map: "fki_fk_movimientos_detalle_cat_tipo_pago")
+  @@index([id_tipo_movimiento], map: "fki_fk_movimientos_detalle_cat_tipos_movimiento")
+  @@index([id_contrato], map: "fki_fk_movimientos_detalle_contratos_terrenos")
+  @@index([id_movimiento_cabecera], map: "fki_fk_movimientos_detalle_movimientos_cabecera")
+  @@index([id_contrato, id_tipo_movimiento, bnd_pagado, fecha_movimiento], map: "idx_movimientos_detalle_contrato_tipo_pagado_fecha")
+  @@index([id_tipo_movimiento, id_contrato, no_pago, fecha_movimiento], map: "idx_movimientos_detalle_idx_id_movi_id_cont_no_pago_fecha")
+  @@index([id_tipo_movimiento, id_contrato, no_pago, fecha_movimiento, bnd_contrato_cancelado], map: "idx_movimientos_detalle_idx_id_movi_id_cont_no_pago_fecha_bnd_c")
+  @@index([id_tipo_movimiento, id_contrato, no_pago], map: "tipo_movimiento_id_contrato_no_pago_idx")
+  @@index([id_contrato, id_tipo_movimiento], map: "tipo_pago_idx")
+  @@index([usuario], map: "usuario_idx")
+}
+
+model permisos_usuario {
+  id_permiso_usuario  Int     @id @default(autoincrement())
+  id_usuario          Int
+  id_permiso          Int
+  bnd_permiso_edicion Boolean
+}
+
+model referencias_personales {
+  id_referencia      Int                 @id @default(autoincrement())
+  abreviatura        String?             @db.VarChar(10)
+  nombre             String?             @db.VarChar(255)
+  ap_paterno         String?             @db.VarChar(255)
+  ap_materno         String?             @db.VarChar(255)
+  parentesco         String?             @db.VarChar(255)
+  calle              String?             @db.VarChar(255)
+  numero             String?             @db.VarChar(255)
+  entre              String?             @db.VarChar(255)
+  ciudad             String?             @db.VarChar(255)
+  cp                 Int?
+  colonia            String?             @db.VarChar(255)
+  estado             String?             @db.VarChar(255)
+  pais               String?             @db.VarChar(255)
+  tel_casa           String?             @db.VarChar(25)
+  tel_cel            String?             @db.VarChar(25)
+  tel_trabajo        String?             @db.VarChar(25)
+  fecha_alta         DateTime?           @db.Timestamp(6)
+  tel_cod_casa       String?             @db.VarChar(25)
+  tel_cod_cel        String?             @db.VarChar(25)
+  tel_cod_trabajo    String?             @db.VarChar(25)
+  id_usuario         Int?
+  observaciones      String?
+  id_terreno         Int?
+  id_contrato        Int?
+  cat_terrenos       cat_terrenos?       @relation(fields: [id_terreno], references: [id_terreno], onDelete: NoAction, onUpdate: NoAction, map: "fk_referencias_personales_cat_terrenos")
+  cat_usuarios       cat_usuarios?       @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_referencias_personales_cat_usuarios")
+  contratos_terrenos contratos_terrenos? @relation(fields: [id_contrato], references: [id_contrato], onDelete: NoAction, onUpdate: NoAction, map: "fk_referencias_personales_contratos_terrenos")
+
+  @@index([id_terreno], map: "fki_fk_referencias_personales_cat_terrenos")
+  @@index([id_usuario], map: "fki_fk_referencias_personales_cat_usuarios")
+  @@index([id_contrato], map: "fki_fk_referencias_personales_contratos_terrenos")
+  @@index([nombre, ap_paterno, ap_materno], map: "nombre_referencia_idx")
+}
+
+model requisitos_archivos {
+  id_archivo                           Int                                 @id @default(autoincrement())
+  id_requisito_fraccionamiento_terreno Int?
+  archivo                              String?
+  ruta_archivo                         String?
+  fecha                                DateTime?                           @db.Timestamp(6)
+  requisitos_fraccionamiento_terreno   requisitos_fraccionamiento_terreno? @relation(fields: [id_requisito_fraccionamiento_terreno], references: [id_requisito_fraccionamiento_terreno], onDelete: NoAction, onUpdate: NoAction, map: "fk_requisitos_archivos_requisitos_fraccionamiento_terreno")
+
+  @@index([id_requisito_fraccionamiento_terreno], map: "fki_fk_requisitos_archivos_requisitos_fraccionamiento_terreno")
+}
+
+model requisitos_fraccionamiento_terreno {
+  id_requisito_fraccionamiento_terreno Int                             @id @default(autoincrement())
+  archivo                              String?
+  ruta_archivo                         String?
+  id_requisito_fraccionamiento         Int?
+  id_terreno                           Int?
+  id_cliente                           Int?
+  id_contrato                          Int?
+  fecha                                DateTime?                       @db.Timestamp(6)
+  requisitos_archivos                  requisitos_archivos[]
+  cat_requisitos_fraccionamiento       cat_requisitos_fraccionamiento? @relation(fields: [id_requisito_fraccionamiento], references: [id_requisito_fraccionamiento], onDelete: NoAction, onUpdate: NoAction, map: "fk_requisitos_fraccionamiento_terreno_cat_requisitos_fraccionam")
+  cat_terrenos                         cat_terrenos?                   @relation(fields: [id_terreno], references: [id_terreno], onDelete: NoAction, onUpdate: NoAction, map: "fk_requisitos_fraccionamiento_terreno_cat_terrenos")
+  clientes                             clientes?                       @relation(fields: [id_cliente], references: [id_cliente], onDelete: NoAction, onUpdate: NoAction, map: "fk_requisitos_fraccionamiento_terreno_clientes")
+  contratos_terrenos                   contratos_terrenos?             @relation(fields: [id_contrato], references: [id_contrato], onDelete: NoAction, onUpdate: NoAction, map: "fk_requisitos_fraccionamiento_terreno_contratos_terrenos")
+
+  @@index([id_requisito_fraccionamiento], map: "fki_fk_requisitos_fraccionamiento_terreno_cat_requisitos_fracci")
+  @@index([id_terreno], map: "fki_fk_requisitos_fraccionamiento_terreno_cat_terrenos")
+  @@index([id_cliente], map: "fki_fk_requisitos_fraccionamiento_terreno_clientes")
+  @@index([id_contrato], map: "fki_fk_requisitos_fraccionamiento_terreno_contratos_terrenos")
+}
+
+model reubicaciones {
+  id_reubicacion                                                            Int                 @id @default(autoincrement())
+  fecha_movimiento                                                          DateTime?           @db.Timestamp(6)
+  id_usuario                                                                Int?
+  id_contrato_anterior                                                      Int?
+  id_contrato_nuevo                                                         Int?
+  comision_porcentaje                                                       Decimal?            @db.Decimal(19, 2)
+  comision_monto                                                            Decimal?            @db.Decimal(19, 2)
+  comentarios                                                               String?
+  saldo_pendiente                                                           Decimal?            @db.Decimal(19, 2)
+  pago_inicial                                                              Decimal?            @db.Decimal(19, 2)
+  no_pagos_pendientes                                                       Int?
+  cat_usuarios                                                              cat_usuarios?       @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_reubicaciones_cat_usuarios")
+  contratos_terrenos_reubicaciones_id_contrato_anteriorTocontratos_terrenos contratos_terrenos? @relation("reubicaciones_id_contrato_anteriorTocontratos_terrenos", fields: [id_contrato_anterior], references: [id_contrato], onDelete: NoAction, onUpdate: NoAction, map: "fk_reubicaciones_contratos_terrenos_anterior")
+  contratos_terrenos_reubicaciones_id_contrato_nuevoTocontratos_terrenos    contratos_terrenos? @relation("reubicaciones_id_contrato_nuevoTocontratos_terrenos", fields: [id_contrato_nuevo], references: [id_contrato], onDelete: NoAction, onUpdate: NoAction, map: "fk_reubicaciones_contratos_terrenos_nuevo")
+
+  @@index([id_usuario], map: "fki_fk_reubicaciones_cat_usuarios")
+  @@index([id_contrato_anterior], map: "fki_fk_reubicaciones_contratos_terrenos")
+  @@index([id_contrato_nuevo], map: "fki_fk_reubicaciones_contratos_terrenos_nuevo")
+}
+
+model servicios_fraccionamiento {
+  id_servicio          Int
+  id_fraccionamiento   Int
+  monto_inicial        Decimal?             @db.Decimal(14, 2)
+  cuenta               String?              @db.VarChar(255)
+  tipo_cuenta          Boolean?
+  idRow                BigInt               @id @default(autoincrement())
+  cat_fraccionamientos cat_fraccionamientos @relation(fields: [id_fraccionamiento], references: [id_fraccionamiento], onDelete: NoAction, onUpdate: NoAction, map: "fk_servicios_fraccionamiento_cat_fraccionamientos")
+  cat_servicios        cat_servicios        @relation(fields: [id_servicio], references: [id_servicio], onDelete: NoAction, onUpdate: NoAction, map: "fk_servicios_fraccionamiento_cat_servicios")
+}
+
+model servicios_informativos_terrenos {
+  id_servicio  Int
+  id_terreno   Int
+  idRow        BigInt       @id @default(autoincrement())
+  cat_terrenos cat_terrenos @relation(fields: [id_terreno], references: [id_terreno], onDelete: NoAction, onUpdate: NoAction, map: "fk_servicios_informativos_terrenos_cat_terrenos")
+
+  @@index([id_servicio], map: "fki_fk_servicios_informativos_terrenos_cat_servicios")
+  @@index([id_terreno], map: "fki_fk_servicios_informativos_terrenos_cat_terrenos")
+}
+
+model servicios_popup {
+  id_solicitud                                               Int                 @id @default(autoincrement())
+  id_servicio                                                Int?
+  id_contrato                                                Int?
+  id_usuario                                                 Int?
+  fecha_solicitud                                            DateTime?           @db.Date
+  fecha_entrega                                              DateTime?           @db.Date
+  fecha_entrega_cliente                                      DateTime?           @db.Date
+  usuario_entrega                                            Int?
+  cat_servicios                                              cat_servicios?      @relation(fields: [id_servicio], references: [id_servicio], onDelete: NoAction, onUpdate: NoAction, map: "fk_servicios_popup_cat_servicios")
+  cat_usuarios_servicios_popup_usuario_entregaTocat_usuarios cat_usuarios?       @relation("servicios_popup_usuario_entregaTocat_usuarios", fields: [usuario_entrega], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_servicios_popup_cat_usuario_entrega")
+  cat_usuarios_servicios_popup_id_usuarioTocat_usuarios      cat_usuarios?       @relation("servicios_popup_id_usuarioTocat_usuarios", fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_servicios_popup_cat_usuarios")
+  contratos_terrenos                                         contratos_terrenos? @relation(fields: [id_contrato], references: [id_contrato], onDelete: NoAction, onUpdate: NoAction, map: "fk_servicios_popup_contratos_terrenos")
+
+  @@index([id_servicio], map: "fki_fk_servicios_popup_cat_servicios")
+  @@index([usuario_entrega], map: "fki_fk_servicios_popup_cat_usuario_entrega")
+  @@index([id_usuario], map: "fki_fk_servicios_popup_cat_usuarios")
+  @@index([id_contrato], map: "fki_fk_servicios_popup_contratos_terrenos")
+}
+
+model sistema_traspasos {
+  id_traspaso                   Int                            @id @default(autoincrement())
+  cliente_anterior              String?                        @db.VarChar(255)
+  id_fraccionamiento            Int?
+  id_manzana                    Int?
+  id_terreno                    Int?
+  fecha_contrato                DateTime?                      @db.Date
+  nombre_cliente_nuevo          String?                        @db.VarChar(255)
+  medio_de_entrega              Int?
+  fecha1                        DateTime?                      @db.Date
+  observaciones                 String?
+  fecha2                        DateTime?                      @db.Date
+  fecha3                        DateTime?                      @db.Date
+  fecha4                        DateTime?                      @db.Date
+  fecha5                        DateTime?                      @db.Date
+  fecha6                        DateTime?                      @db.Date
+  fecha7                        DateTime?                      @db.Date
+  fecha8                        DateTime?                      @db.Date
+  fecha9                        DateTime?                      @db.Date
+  fecha10                       DateTime?                      @db.Date
+  fecha11                       DateTime?                      @db.Date
+  fecha12                       DateTime?                      @db.Date
+  fecha13                       DateTime?                      @db.Date
+  fecha14                       DateTime?                      @db.Date
+  traspasado                    Boolean?
+  precio_terreno                Decimal?                       @db.Decimal(19, 2)
+  monto_cargo                   Decimal?                       @db.Decimal(19, 2)
+  folio                         String?                        @db.VarChar(50)
+  cancelado                     Boolean?
+  cat_fraccionamientos          cat_fraccionamientos?          @relation(fields: [id_fraccionamiento], references: [id_fraccionamiento], onDelete: NoAction, onUpdate: NoAction, map: "fk_sistema_traspasos_cat_fraccionamientos")
+  cat_manzanas                  cat_manzanas?                  @relation(fields: [id_manzana], references: [id_manzana], onDelete: NoAction, onUpdate: NoAction, map: "fk_sistema_traspasos_cat_manzanas")
+  cat_medios_entrega_documentos cat_medios_entrega_documentos? @relation(fields: [medio_de_entrega], references: [id_medio_entrega], onDelete: NoAction, onUpdate: NoAction, map: "fk_sistema_traspasos_cat_medios_entrega_documentos")
+  cat_terrenos                  cat_terrenos?                  @relation(fields: [id_terreno], references: [id_terreno], onDelete: NoAction, onUpdate: NoAction, map: "fk_sistema_traspasos_cat_terrenos")
+
+  @@index([id_fraccionamiento], map: "fki_fk_sistema_traspasos_cat_fraccionamientos")
+  @@index([id_manzana], map: "fki_fk_sistema_traspasos_cat_manzanas")
+  @@index([medio_de_entrega], map: "fki_fk_sistema_traspasos_cat_medios_entrega_documentos")
+  @@index([id_terreno], map: "fki_fk_sistema_traspasos_cat_terrenos")
+}
+
+model sistema_traspasos_folios {
+  empresa1 Int?
+  empresa2 Int?
+  empresa3 Int?
+  empresa4 Int?
+  empresa5 Int?
+  idRow    BigInt @id @default(autoincrement())
+}
+
+model sistema_traspasos_recibos {
+  id                   Int                   @id @default(autoincrement())
+  id_traspaso          Int?
+  folio                String?               @db.VarChar(15)
+  cliente_anterior     String?               @db.VarChar(255)
+  cliente_nuevo        String?               @db.VarChar(255)
+  id_fraccionamiento   Int?
+  id_manzana           Int?
+  id_terreno           Int?
+  fecha_contrato       DateTime?             @db.Date
+  precio_terreno       Decimal?              @db.Decimal(19, 2)
+  monto_cargo          Decimal?              @db.Decimal(19, 2)
+  cancelado            Boolean?
+  fecha_recibo         DateTime?             @db.Date
+  cajero               Int?
+  cat_fraccionamientos cat_fraccionamientos? @relation(fields: [id_fraccionamiento], references: [id_fraccionamiento], onDelete: NoAction, onUpdate: NoAction, map: "fk_sistema_traspasos_recibos_cat_fraccionamientos")
+  cat_manzanas         cat_manzanas?         @relation(fields: [id_manzana], references: [id_manzana], onDelete: NoAction, onUpdate: NoAction, map: "fk_sistema_traspasos_recibos_cat_manzanas")
+  cat_terrenos         cat_terrenos?         @relation(fields: [id_terreno], references: [id_terreno], onDelete: NoAction, onUpdate: NoAction, map: "fk_sistema_traspasos_recibos_cat_terrenos")
+  cat_usuarios         cat_usuarios?         @relation(fields: [cajero], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_sistema_traspasos_recibos_cat_usuarios")
+
+  @@index([id_fraccionamiento], map: "fki_fk_sistema_traspasos_recibos_cat_fraccionamientos")
+  @@index([id_manzana], map: "fki_fk_sistema_traspasos_recibos_cat_manzanas")
+  @@index([id_terreno], map: "fki_fk_sistema_traspasos_recibos_cat_terrenos")
+  @@index([cajero], map: "fki_fk_sistema_traspasos_recibos_cat_usuarios")
+}
+
+model traspasos {
+  id_traspaso                                      Int                 @id @default(autoincrement())
+  fecha                                            DateTime?           @db.Timestamp(6)
+  id_cliente_nuevo                                 Int?
+  id_cliente_anterior                              Int?
+  comision                                         Decimal?            @db.Decimal(19, 2)
+  id_contrato                                      Int?
+  monto_comision                                   Decimal?            @db.Decimal(19, 2)
+  id_usuario                                       Int?
+  comentarios                                      String?
+  folio_recibo                                     String?             @db.VarChar(25)
+  clientes_traspasos_id_cliente_anteriorToclientes clientes?           @relation("traspasos_id_cliente_anteriorToclientes", fields: [id_cliente_anterior], references: [id_cliente], onDelete: NoAction, onUpdate: NoAction, map: "fk_traspasos_clientes_anterior")
+  cat_usuarios                                     cat_usuarios?       @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_traspasos_clientes_cat_usuarios")
+  clientes_traspasos_id_cliente_nuevoToclientes    clientes?           @relation("traspasos_id_cliente_nuevoToclientes", fields: [id_cliente_nuevo], references: [id_cliente], onDelete: NoAction, onUpdate: NoAction, map: "fk_traspasos_clientes_nuevo")
+  contratos_terrenos                               contratos_terrenos? @relation(fields: [id_contrato], references: [id_contrato], onDelete: NoAction, onUpdate: NoAction, map: "fk_traspasos_contratos_terrenos")
+
+  @@index([id_cliente_anterior], map: "fki_fk_traspasos_clientes_anterior")
+  @@index([id_usuario], map: "fki_fk_traspasos_clientes_cat_usuarios")
+  @@index([id_cliente_nuevo], map: "fki_fk_traspasos_clientes_nuevo")
+  @@index([id_contrato], map: "fki_fk_traspasos_contratos_terrenos")
+}
+
+model cat_estaciones {
+  id_estacion Int    @id @default(autoincrement())
+  nombre      String @db.VarChar(10)
+}
+
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model carga_clientes_cobranza {
+  id_carga               BigInt    @id @default(autoincrement())
+  id_contrato            Int       @default(autoincrement())
+  fecha_carga            DateTime? @db.Date
+  usuario_asignado       Int?
+  id_tipo_vencimiento    Int?
+  monto_vencido          Decimal?  @db.Decimal(19, 2)
+  mensualidades_vencidas Int?
+
+  @@index([id_contrato], map: "idx_carga_clientes_contrato")
+  @@index([fecha_carga], map: "idx_carga_clientes_fecha_carga")
+  @@index([id_tipo_vencimiento], map: "idx_carga_clientes_tipo_vencimiento")
+  @@index([fecha_carga], map: "idx_carga_clientes_cobranza_fecha_carga")
+  @@index([id_contrato], map: "idx_carga_clientes_cobranza_id_contrato")
+  @@index([id_contrato, fecha_carga], map: "idx_carga_clientes_cobranza_id_contrato_fecha_carga")
+  @@index([id_tipo_vencimiento], map: "idx_carga_clientes_cobranza_id_tipo_vencimiento")
+  @@index([monto_vencido], map: "idx_carga_clientes_cobranza_monto_vencido")
+}
+
+model cat_tipos_contrato {
+  id_tipo_contrato Int     @id @default(autoincrement())
+  tipo             String  @db.VarChar(255)
+  bnd_activo       Boolean
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model clientes_tel_adicionales {
+  id_cliente   Int
+  telefono     String   @db.VarChar(255)
+  tel_usa_cel  Boolean?
+  tel_usa_casa Boolean?
+
+  @@ignore
+}
+
+model atencion_a_clientes_escrituras {
+  id                         Int       @default(autoincrement())
+  id_presupuesto             Int       @id
+  id_contrato                Int?
+  id_usuario                 Int?
+  estado                     Int?
+  fecha_pago_anticipo        DateTime? @db.Date
+  fecha_revision_contraloria DateTime? @db.Date
+  fecha_solicitud_documentos DateTime? @db.Date
+  fecha_firma_notaria        DateTime? @db.Date
+  fecha_recepcion_escritura  DateTime? @db.Date
+  fecha_escritura_escaneada  DateTime? @db.Date
+  fecha_entrega_cliente      DateTime? @db.Date
+}
